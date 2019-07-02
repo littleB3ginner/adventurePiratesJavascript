@@ -1,0 +1,426 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Pirates</title>
+
+<style>
+@font-face {
+    font-family: PiratesWriters;
+    src: url(PiratesWriters.ttf);
+}
+* {
+	font-family:PiratesWriters;
+	font-size: 20px;
+}
+#stage {
+	position:relative;
+	width:768px;
+	height:768px;
+	background-image: url("background.png");
+	background-size: 768px 768px;
+	background-repeat: no-repeat;
+}
+
+.cell {
+	display:block;
+	position:absolute;
+	width:64px;
+	height:64px;
+}
+
+p {
+	width:400px;
+}
+	
+
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+<p id="output"></p>
+
+
+
+
+<script>
+
+var stage = document.querySelector("#stage");
+var output = document.querySelector("#output");
+
+var map =
+[
+	[0,2,0,0,0,0,0,2,0,0,0,3],
+	[0,0,0,1,0,0,0,0,0,1,0,0],
+	[0,1,0,0,0,0,0,0,0,1,0,0],
+	[0,0,0,0,2,0,0,2,0,0,2,0],
+	[0,2,0,1,0,0,0,2,0,1,0,0],
+	[0,0,0,0,2,0,1,1,0,0,2,0],
+	[0,2,0,0,0,0,0,2,0,0,0,0],
+	[0,0,0,1,0,0,0,0,0,1,0,0],
+	[0,1,0,0,0,0,0,0,0,1,0,0],
+	[0,0,0,0,2,0,0,2,0,0,2,0],
+	[0,2,0,1,0,0,0,2,0,1,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0]
+];
+
+var gameObjects =
+[
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,5,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,0],
+	[4,0,0,0,0,0,0,0,0,0,0,0]
+];
+var shipRow;
+var shipColumn;
+var monsterRow;
+var monsterColumn;
+
+var food = 26;
+var gold = 20;
+var experience = 0;
+var gameMessage = "Use the arrow keys to find your way home.";
+
+var water = 0;
+var island = 1;
+var pirate = 2;
+var home = 3;
+var ship = 4;
+var MONSTER = 5;
+
+window.addEventListener("keydown",keyHandler,false);
+
+var up = 38;
+var down = 40;
+var right = 39;
+var left = 37;
+
+var size = 64;
+
+var ROWS = map.length;
+var COLUMNS = map[0].length;
+
+for(var row = 0; row < ROWS; row++) 
+{	
+  for(var column = 0; column < COLUMNS; column++) 
+  {
+    if(gameObjects[row][column] === ship)
+    { 
+      shipRow = row;
+      shipColumn = column;
+    }
+	if(gameObjects[row][column] === MONSTER)
+    { 
+      monsterRow = row;
+      monsterColumn = column;
+    }
+  }
+}
+
+render();
+
+function render() {
+	
+	if(stage.hasChildNodes())
+	{
+	for(var i = 0; i < ROWS * COLUMNS; i++)
+	{
+	stage.removeChild(stage.firstChild);
+	}
+}
+
+	for(var row = 0; row < ROWS; row++)
+	{
+	for(var column = 0; column < COLUMNS; column++)
+	{
+		var cell = document.createElement("img");
+		
+		cell.setAttribute("class","cell");
+		
+		stage.appendChild(cell);
+		
+		switch(map[row][column])
+		{
+		case water:
+			cell.src = "water.png";
+			break;
+			
+		case island:
+			cell.src = "island.png";
+			break;
+			
+		case pirate:
+			cell.src = "pirate.png";
+			break;
+			
+		case home:
+			cell.src = "home.png";
+			break;
+	}
+	switch(gameObjects[row][column])
+	{
+	case ship:
+		cell.src = "ship.png";
+		break;
+		
+	case MONSTER:
+		cell.src = "monster.png";
+		break;
+	}
+	
+	cell.style.top = row * size + "px";
+	cell.style.left = column * size + "px";
+}
+}
+	output.innerHTML = gameMessage;
+	
+
+	output.innerHTML 
+	  += "<br>Gold: " + gold + ", Food: " 
+	  + food + ", Experience: " + experience;
+}
+
+function keyHandler(event)
+{
+	switch (event.keyCode)
+	{
+	case up:
+		if(shipRow > 0)
+		{
+		gameObjects[shipRow][shipColumn] = 0;
+		shipRow--;
+		gameObjects[shipRow][shipColumn] = ship;
+		}
+	break;
+	
+	case down:
+	if(shipRow < ROWS - 1)
+		{
+		gameObjects[shipRow][shipColumn] = 0;
+		shipRow++;
+		gameObjects[shipRow][shipColumn] = ship;
+		}
+	break;
+	
+	case left:
+	if(shipColumn > 0)
+		{
+		gameObjects[shipRow][shipColumn] = 0;
+		shipColumn--;
+		gameObjects[shipRow][shipColumn] = ship;
+		}
+	break;
+	
+	case right:
+	if(shipColumn < COLUMNS - 1)
+		{
+		gameObjects[shipRow][shipColumn] = 0;
+		shipColumn++;
+		gameObjects[shipRow][shipColumn] = ship;
+		}
+	break;
+	}
+	
+	switch (map[shipRow][shipColumn])
+	{
+	case water:
+	gameMessage = "You sail the open seas";
+	break;
+	
+	case pirate:
+	fight();
+	break;
+	
+	case island:
+	trade();
+	break;
+	
+	case home:
+	endGame();
+	break;
+	}
+	moveMonster();
+	
+	if(gameObjects[shipRow][shipColumn] === MONSTER)
+	{
+    endGame();
+	}
+	
+	food--;
+	
+	if(food <= 0 || gold <= 0)
+	{
+	endGame();
+	}
+	
+	render();
+}
+
+function moveMonster()
+{
+
+  var UP = 1;
+  var DOWN = 2;
+  var LEFT = 3;
+  var RIGHT = 4;
+  
+  var validDirections = [];
+  
+  var direction = undefined;
+  
+  if(monsterRow > 0)
+  {
+    var thingAbove = map[monsterRow - 1][monsterColumn];
+    if(thingAbove === water)
+	  {
+	    validDirections.push(UP)
+	  }
+  }
+  if(monsterRow < ROWS - 1)
+  { 
+    var thingBelow = map[monsterRow + 1][monsterColumn];
+    if(thingBelow === water)
+	  {
+	    validDirections.push(DOWN)
+	  }
+  }
+  if(monsterColumn > 0)
+  {
+    var thingToTheLeft = map[monsterRow][monsterColumn - 1];
+    if(thingToTheLeft === water)
+	  {
+	    validDirections.push(LEFT)
+	  }
+  } 
+  if(monsterColumn < COLUMNS - 1)
+  {
+    var thingToTheRight = map[monsterRow][monsterColumn + 1];
+    if(thingToTheRight === water)
+	  {
+	    validDirections.push(RIGHT)
+	  }
+  } 
+
+  if(validDirections.length !== 0)
+  {
+    var randomNumber = Math.floor(Math.random() * validDirections.length);
+    direction = validDirections[randomNumber];
+  }
+  
+  switch(direction)
+  {
+    case UP:
+		  gameObjects[monsterRow][monsterColumn] = 0;
+		  monsterRow--; 
+		  gameObjects[monsterRow][monsterColumn] = MONSTER;
+		  break;
+	  
+	  case DOWN:
+	    gameObjects[monsterRow][monsterColumn] = 0;
+		  monsterRow++;
+		  gameObjects[monsterRow][monsterColumn] = MONSTER;
+	    break;
+	  
+	  case LEFT:
+	    gameObjects[monsterRow][monsterColumn] = 0;
+		  monsterColumn--;
+		  gameObjects[monsterRow][monsterColumn] = MONSTER;
+	    break;
+	 
+	 case RIGHT:
+	    gameObjects[monsterRow][monsterColumn] = 0;
+		  monsterColumn++;
+		  gameObjects[monsterRow][monsterColumn] = MONSTER;
+  }
+}
+  
+function trade()
+{
+	var islandsFood = experience + gold;
+	var cost = Math.ceil(Math.random() * islandsFood);
+	
+	if(gold > cost)
+	{
+	food += islandsFood;
+	gold -= cost;
+	experience += 2;
+	
+	gameMessage = "You buy " +islandsFood+" coconuts" + " for "+cost +" gold pieces";
+}
+else
+{
+	experience += 1;
+	gameMessage = "You don't have enough gold to buy food";
+}
+}
+
+function fight()
+{
+	var shipStrength = Math.ceil((food + gold) / 2);
+	
+	var pirateStrength = Math.ceil(Math.random() * shipStrength * 2);
+	
+	if(pirateStrength > shipStrength)
+	{
+	
+	var stolenGold = Math.round(pirateStrength /2);
+	gold -= stolenGold;
+	experience += 1;
+	
+	gameMessage = "You fight and lose "+stolenGold+ " gold pieces. "
+	+"<br> Ship's Strength: "+shipStrength + "<br> Pirate's Strength: " + pirateStrength;
+	}
+	else
+	{
+	var pirateGold = Math.round(pirateStrength / 2);
+	gold += pirateGold;
+	
+	experience += 2;
+	
+	gameMessage = "You fight and win " +pirateGold+ " gold pieces. "
+	+ "<br> Ship's Strength: "+shipStrength + " <br>Pirate's Strength: " + pirateStrength;
+	}
+}
+
+function endGame() 
+{
+	if(map[shipRow][shipColumn] === home)
+	{
+	var score = food + gold + experience;
+	
+	gameMessage = "You made it home Alive "+ "<br> Final Score: "+score;
+	}
+	else if(gameObjects[shipRow][shipColumn] === MONSTER)
+	{
+    gameMessage 
+      = "Your ship has been swallowed by a sea monster!";
+	}
+	else
+	{
+	if(gold <= 0)
+	{ 
+	gameMessage += "<br> You are out of gold";
+	}
+	else
+	{
+	gameMessage += "<br> You are out of food";
+	}
+	gameMessage += "<br> Your crew throws you overboard";
+}
+	window.removeEventListener("keydown",keyHandler,false);
+}
+	
+	
+	
+</script>
+</body>
+</html>
